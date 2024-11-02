@@ -139,9 +139,10 @@ class NodePropPredDataset(object):
             return
 
         else:
-            inp = input(
-                "Will you download the dataset(s) now? (y/N)\n"
-            ).lower()  # ask if the user wants to download the dataset
+            # inp = input(
+            #     "Will you download the dataset(s) now? (y/N)\n"
+            # ).lower()  # ask if the user wants to download the dataset
+            inp = "y"
             if inp == "y":
                 print(
                     f"{BColors.WARNING}Download started, this might take a while . . . {BColors.ENDC}"
