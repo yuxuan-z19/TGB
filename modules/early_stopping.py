@@ -41,7 +41,7 @@ class EarlyStopMonitor(object):
         """
         return self.save_model_dir + '/{}.pth'.format(self.save_model_id)
     
-    def step_check(self, curr_metric: float, models_dict: dict):
+    def step_check(self, curr_metric: float, model: torch.nn.Module):
         r"""
         execute the early stop strategy
         :param: metric: a metric to evaluate the early stopping on
@@ -54,7 +54,7 @@ class EarlyStopMonitor(object):
             # first iteration or observing an improvement
             self.best_sofar = curr_metric
             print("INFO: save a checkpoint...")
-            self.save_checkpoint(models_dict)
+            self.save_checkpoint(model)
             self.counter = 0
             self.best_epoch = self.epoch_idx
         else:
@@ -65,29 +65,20 @@ class EarlyStopMonitor(object):
         
         return self.counter >= self.patience
     
-    def save_checkpoint(self, models_dict: dict):
+    def save_checkpoint(self, models: torch.nn.Module):
         r"""
         save models as a checkpoint
         :param: models_dict: a dictionary containing all models to be saved 
         """
         model_path = self.get_best_model_path()
         print("INFO: save the model to {}".format(model_path))
-        model_names = list(models_dict.keys())
-        model_components = list(models_dict.values())
-        torch.save({model_names[i]: model_components[i].state_dict() for i in range(len(model_names))}, 
-                    model_path)
+        torch.save(models.state_dict(), model_path)
 
-    def load_checkpoint(self, models_dict: dict):
+    def load_checkpoint(self, model: torch.nn.Module):
         r"""
         save models from the checkpoint
         :param: models_dict: a dictionary containing all models
         """
         model_path = self.get_best_model_path()
         print("INFO: load the model of epoch {} from {}".format(self.best_epoch, model_path))
-        checkpoint = torch.load(model_path)
-        for model_name, model in models_dict.items():
-            model.load_state_dict(checkpoint[model_name])
-        
-
-
-        
+        model.load_state_dict(torch.load(model_path, weights_only=True))
